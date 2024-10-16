@@ -20,18 +20,15 @@ func main() {
 
 	flag.Parse()
 
-	if help {
-		fmt.Println("Cara pakai: mockdata -i input.json -o output.json")
+	if help || inputPath == "" || outputPath == "" {
+		printUsage()
 		os.Exit(0)
 	}
 
-	if inputPath == "" {
-		fmt.Println("Input wajib diisi")
-		os.Exit(0) // kalo nol, exit tanpa masalah. Non-zero ada masalah
-	}
+}
 
-	if outputPath == "" {
-		fmt.Println("Output wajib diisi")
-		os.Exit(0)
-	}
+func printUsage() {
+	fmt.Println("Usage: mockdata [-i | --input] <input file> [-o | --output] <output file>")
+	fmt.Println("-i --input: File input berupa JSON sebagai template")
+	fmt.Println("-o --output: File output berupa JSON sebagai hasil")
 }
