@@ -9,6 +9,8 @@ import (
 	"io"
 	"os"
 	"strings"
+
+	"github.com/Aziz8860/mockdata/data"
 )
 
 func main() {
@@ -48,6 +50,17 @@ func main() {
 
 	if err := validateType(mapping); err != nil {
 		fmt.Printf("gagal memvalidasi tipe data: %s \n", err)
+		os.Exit(0)
+	}
+
+	result, err := generateOutput(mapping)
+	if err != nil {
+		fmt.Printf("gagal membuat data: %s, \n", err)
+		os.Exit(0)
+	}
+
+	if err := writeOutput(outputPath, result); err != nil {
+		fmt.Printf("gagal menulis hasil: %s, \n", err)
 		os.Exit(0)
 	}
 }
@@ -124,17 +137,49 @@ func readInput(path string, mapping *map[string]string) error {
 }
 
 func validateType(mapping map[string]string) error {
-	supported := map[string]bool{
-		"name":    true,
-		"address": true,
-		"date":    true,
-		"phone":   true,
-	}
-
 	for _, value := range mapping {
-		if !supported[value] {
+		if !data.Supported[value] {
 			return errors.New("tipe data tidak didukung")
 		}
+	}
+
+	return nil
+}
+
+func generateOutput(mapping map[string]string) (map[string]any, error) {
+	result := make(map[string]any)
+
+	for key, dataType := range mapping {
+		result[key] = data.Generate(dataType)
+	}
+
+	return result, nil
+}
+
+func writeOutput(path string, result map[string]any) error {
+	if path == "" {
+		return errors.New("path tidak valid")
+	}
+
+	// BUKA FILE
+	// flag disini artinya inklusif
+	// misal: 010 | 011 = 011
+	// trunc untuk mengosongkan, misal ingin kita timpa
+	flags := os.O_RDWR | os.O_CREATE | os.O_TRUNC
+	file, err := os.OpenFile(path, flags, 0644) // 644 kita bisa buka membaca, orang lain cuma bisa membaca
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	// ISI FILE
+	resultByte, err := json.MarshalIndent(result, "", "    ") // kekurangan marshal dia cuma jadi 1 baris. Biar rapi pake MarshalIndent
+	if err != nil {
+		return err
+	}
+
+	if _, err := file.Write(resultByte); err != nil {
+		return err
 	}
 
 	return nil
