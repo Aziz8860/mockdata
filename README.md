@@ -5,3 +5,8 @@ CLI tool untuk membuat data palsu berdasarkan input JSON
 1. install
 2. siapkan input
 3. jalankan perintah
+
+## Command on CLI
+```
+go run main.go --input ./input.json --output ./output.json
+```
